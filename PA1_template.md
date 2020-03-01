@@ -1,17 +1,41 @@
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, scientific = FALSE)
-```
 
 
-```{r}
+
+
+```r
 # Load tidyverse package
 library(tidyverse)
+```
+
+```
+## -- Attaching packages --------------------------------------- tidyverse 1.3.0 --
+```
+
+```
+## v tibble  2.1.3     v dplyr   0.8.4
+## v tidyr   1.0.2     v stringr 1.4.0
+## v readr   1.3.1     v forcats 0.5.0
+## v purrr   0.3.3
+```
+
+```
+## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::between()   masks data.table::between()
+## x dplyr::filter()    masks stats::filter()
+## x dplyr::first()     masks data.table::first()
+## x dplyr::lag()       masks stats::lag()
+## x dplyr::last()      masks data.table::last()
+## x purrr::transpose() masks data.table::transpose()
+```
+
+```r
 library(data.table)
 ```
 
 
 Loading the dataset
-```{r}
+
+```r
 # Unzip and store data, 
 activity <- unzip("activity.zip")
 data_R <- read.csv("activity.csv")
@@ -19,14 +43,31 @@ data_R <- read.csv("activity.csv")
 str(data_R)
 ```
 
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
 
 Processing the dataset
-```{r}
+
+```r
 # clean up the raw dataset and Convert date variable from factor to date, and remove NAs
 data <- na.omit(data_R)
 data$date <- as.Date(data$date)
 # Describe the dataset
 str(data)
+```
+
+```
+## 'data.frame':	15264 obs. of  3 variables:
+##  $ steps   : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ date    : Date, format: "2012-10-02" "2012-10-02" "2012-10-02" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+##  - attr(*, "na.action")= 'omit' Named int  1 2 3 4 5 6 7 8 9 10 ...
+##   ..- attr(*, "names")= chr  "1" "2" "3" "4" ...
 ```
 
 
@@ -37,7 +78,8 @@ For this part of the assignment, you can ignore the missing values in the datase
 
 1. Calculate the total number of steps taken per day
 
-```{r}
+
+```r
 # Group data by date, and summarize the sum of steps
 steps_day <- data %>% 
     group_by(date) %>% 
@@ -50,7 +92,8 @@ steps_day <- data %>%
 
 
 
-```{r}
+
+```r
 # Histogram of the total number of steps taken each day
 ggplot(data = data.frame(steps_day), aes(steps_day$totalsteps)) + 
   geom_histogram(breaks=seq(0, 25000, by=5000), 
@@ -59,17 +102,20 @@ ggplot(data = data.frame(steps_day), aes(steps_day$totalsteps)) +
   labs(title = "Histogram of total number of steps taken each day")
 ```
 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png)
+
 
 
 3. Calculate and report the mean and median of the total number of steps taken per day
 
-```{r}
+
+```r
 m <- mean(steps_day$totalsteps)
 me <- median(steps_day$totalsteps)
 m1 <- format(round(m), scientific = FALSE)
 ```
 
-###The mean total number of steps taken per day is `r m1` and its  median is `r me`
+###The mean total number of steps taken per day is 10766 and its  median is 10765
 
 
 
@@ -82,7 +128,8 @@ m1 <- format(round(m), scientific = FALSE)
 
 
 
-```{r}
+
+```r
 # Group the dataset by 5 minute interval and summarize the average
 # Determine the number of steps in that interval
 i_steps <- aggregate(steps ~ interval, data, mean)
@@ -95,12 +142,15 @@ plot(i_steps$interval, i_steps$steps,
      main="Time series of the average number of steps averaged across all days")
 ```
 
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png)
+
 
 
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 
-```{r}
+
+```r
 f_ave <- data %>%
     group_by(interval) %>%
     summarize(AverageSteps=mean(steps))
@@ -109,7 +159,7 @@ st <- f_ave$AverageSteps[which.max(f_ave$AverageSteps)]
 st1 <-format(round(st), scientific = FALSE) 
 ```
 
-### The maximum number of steps `r st1`  happened during the interval `r interval_M`
+### The maximum number of steps 206  happened during the interval 835
 
 
 
@@ -121,12 +171,13 @@ Note that there are a number of days/intervals where there are missing values (c
 
 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with \color{red}{\verb|NA|}NAs)
 
-```{r}
+
+```r
 # Determine the number of missing values
 missing_V <- sum(is.na(data_R$steps))
 ```
 
-###The number of missing values  is `r missing_V` NAs  in the raw dataset.
+###The number of missing values  is 2304 NAs  in the raw dataset.
 
 
 
@@ -137,7 +188,8 @@ missing_V <- sum(is.na(data_R$steps))
 
 To fill in the NAs, we will take the average number of steps during that 5 minute interval over all days and assign it to the missing values NA.
 
-```{r}
+
+```r
 # Fill  in the NAs in dataset by assigning the average value 
 data_F <- data_R
 for (i in 1:nrow(data_F)) {
@@ -156,7 +208,8 @@ data_F$date <- as.Date(data_F$date)
 
 Histogram of the new filled dataset:
 
-```{r}
+
+```r
 # Group data by date, and summarize the sum of steps
 F_steps_day <- data_F %>% 
     group_by(date) %>% 
@@ -169,14 +222,17 @@ hist(F_steps_day$TotalSteps,
      col= "red")
 ```
 
-```{r}
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png)
+
+
+```r
 m2 <- mean(F_steps_day$TotalSteps)
 me2 <- median(F_steps_day$TotalSteps)
 m21 <- format(round(m2), scientific = FALSE)
 me21 <- format(round(me2), scientific = FALSE)
 ```
 
-###The mean total number of steps per day is `r m21` and the median is `r me21`. The mean stay the same, but the median is now equal to the mean. Inputting missing data do not change the average daily total number of steps but modify the median.
+###The mean total number of steps per day is 10766 and the median is 10766. The mean stay the same, but the median is now equal to the mean. Inputting missing data do not change the average daily total number of steps but modify the median.
 
 
 
@@ -192,7 +248,8 @@ For this part the \color{red}{\verb|weekdays()|}weekdays() function may be of so
 
 Make a variable for the day of the week, and use that to make a "weekend/weeday" variable
 
-```{r}
+
+```r
 # Make weekday variable
 data_F$day <- weekdays(data_F$date)
 # Define all days as weekdays
@@ -206,7 +263,8 @@ data_F$daytype[data_F$day %in% c("Saturday", "Sunday")] <- "weekend"
 
 Calculate the average weekday steps versus average weekend steps
 
-```{r}
+
+```r
 # Group the data by 5 minute interval and summarize the average
 # number of steps in that interval
 D_average <- data_F %>%
@@ -217,12 +275,27 @@ D_average$daytype <- as.factor(D_average$daytype)
 str(D_average)
 ```
 
+```
+## Classes 'grouped_df', 'tbl_df', 'tbl' and 'data.frame':	288 obs. of  3 variables:
+##  $ daytype     : Factor w/ 1 level "weekday": 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval    : int  0 5 10 15 20 25 30 35 40 45 ...
+##  $ AverageSteps: num  1.717 0.3396 0.1321 0.1509 0.0755 ...
+##  - attr(*, "groups")=Classes 'tbl_df', 'tbl' and 'data.frame':	1 obs. of  2 variables:
+##   ..$ daytype: chr "weekday"
+##   ..$ .rows  :List of 1
+##   .. ..$ : int  1 2 3 4 5 6 7 8 9 10 ...
+##   ..- attr(*, ".drop")= logi TRUE
+```
+
 Plot of weekdays versus weekends
 
-```{r}
+
+```r
 # Use ggplot with facet_wrap() function to split the plot into facets, subplots that each display one subset of the data which make the plot easily to analyse.
 ggplot( data = D_average) +
   geom_line(mapping = aes( x = interval, y = AverageSteps), color = "red")+
    labs(title = "Average steps taken Weekends versus Weekdays")+
   facet_wrap( ~ daytype, nrow = 2)
 ```
+
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png)
